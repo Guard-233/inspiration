@@ -1,0 +1,43 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let city = {
+      name: '上海',
+      age: '未知',
+      region: [1,2,3,4],
+      obj: {
+        name: '虹桥',
+        age: '未知'
+      },
+      sayName: function () {
+        console.log('tag', name)
+      }
+    }
+
+    function deepCopy (obj, newObj = {}) {
+      newObj = newObj instanceof Array ? [] : {}
+      for (let item in obj) {
+        if (typeof obj[item] === 'object') {
+          if (obj[item] instanceof Array) {
+            newObj[item] = deepCopy(obj[item], [])
+          } else {
+            newObj[item] = deepCopy(obj[item], [])
+          }
+        } else {
+          newObj[item] = obj[item]
+        }
+      }
+      return newObj
+    }
+    var newCity = deepCopy(city)
+    newCity.region.push(5)
+    console.log('tag', city, newCity)
+  </script>
+</body>
+</html>

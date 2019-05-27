@@ -1,0 +1,127 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .myUl {
+            height: 300px;
+            overflow: scroll;
+        }
+
+        .myUl li {
+            height: 20px;
+        }
+
+        /* .myUl::before {
+            content: '';
+            display: block;
+            margin-top: 5000px
+        }
+
+        .myUl::after {
+            content: '';
+            display: block;
+            margin-bottom: 5000px
+        } */
+    </style>
+</head>
+
+<body>
+    <ul class="myUl">
+
+    </ul>
+    <p class="time"></p>
+    <div>
+        <input class="serach" type="text" placeholder="请输入一个最小值" >
+        <button class="goSerach">搜索</button>
+        <button class="allCheck">全选</button>
+        <button class="reCheck">反选</button>
+    </div>
+    <script>
+        let myUl = document.querySelector('.myUl')
+        let docFrag = document.createDocumentFragment()
+
+        let liDataLength = 1000000
+        let liDataArr = []
+        let showDomLength = 30
+        let myTop = 0
+        for (let i = 0; i < liDataLength; i++) {
+            liDataArr.push({
+                num: Math.round(Math.random() * liDataLength),
+                check: false
+            })
+        }
+        function showDomFun(firstShow) {
+            myUl.innerHTML = ''
+            let time = new Date()
+            let length = showDomLength > liDataLength ? liDataLength : showDomLength
+            for (let i = firstShow; i < firstShow + length; i++) {
+                if (!liDataArr[i]) {
+                    continue
+                }
+                let li = document.createElement('li')
+                        
+                li.innerHTML = `<input data-id=${i} type="checkbox" ${liDataArr[i].check ? 'checked' : ''} > ${i}-------${liDataArr[i].num}`
+                docFrag.appendChild(li)
+            }
+            myUl.appendChild(docFrag)
+            myUl.firstElementChild.style.marginTop = firstShow * 20 + 'px'
+            myUl.lastElementChild.style.marginBottom = (liDataLength - firstShow) * 20 + 'px'
+            var showTime = document.querySelector('.time')
+            showTime.innerText = new Date().getTime() - time.getTime()
+        }
+        let reshow = true
+        myUl.addEventListener('scroll', function (event){
+            myTop = Math.round(this.scrollTop / 20)
+            if (reshow && myTop < liDataLength) {
+                reshow = false
+                setTimeout(() => {
+                    reshow = true
+                }, 10);
+                // console.log(event)
+                showDomFun(myTop)
+            }
+        })
+        myUl.addEventListener('click', function (event){
+            if (event.target.nodeName.toLocaleLowerCase() === 'input') {
+                let i = event.target.dataset['id']
+                liDataArr[i].check = !liDataArr[i].check 
+            }
+        })
+        var saveArr = liDataArr
+
+        document.querySelector('.goSerach').addEventListener('click', function () {
+            var serach = document.querySelector('.serach').value
+            liDataArr = saveArr.filter(item => item > serach)
+            liDataLength = liDataArr.length
+            showDomFun(myTop)
+
+        })
+        document.querySelector('.allCheck').addEventListener('click', function (){
+            liDataArr.forEach(item => {
+                item.check = true
+            })
+            showDomFun(myTop)
+        })
+        document.querySelector('.reCheck').addEventListener('click', function (){
+            liDataArr.forEach(item => {
+                item.check = !item.check
+            })
+            showDomFun(myTop)
+        })
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && (event.key === 'F' || event.key === 'f')) {
+                event.preventDefault()
+                // alert(1)
+            }
+        })
+        showDomFun(0)
+
+
+    </script>
+</body>
+
+</html>

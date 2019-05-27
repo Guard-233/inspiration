@@ -1,0 +1,98 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .parent{
+      width: 100%;
+      height: 150px;
+      position: relative;
+      overflow: hidden;
+    }
+    .parent .base{
+      position: absolute;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      z-index: 0;
+      transform: translateX(-125%);
+      list-style: none;
+      text-align: center;
+      transition: all 1s ease;
+      opacity: 0;
+    }
+    .parent .active{
+      transform: translateX(50%);
+      background: rgb(241, 154, 103);
+      z-index: 2;
+      opacity: 1;
+
+    }
+    .parent .stageLeft{
+      transform: translateX(-25%) scale(0.87);
+      background: sienna;
+      z-index: 1;
+      opacity: 1;
+
+    }
+    .parent .stageLeft{
+
+    }
+    .parent .stageRight{
+      transform: translateX(125%) scale(0.87);
+      background: rgb(145, 22, 128);
+      z-index: 1;
+      opacity: 1;
+
+    }
+  </style>
+</head>
+<body>
+  <ul class="parent">
+    <li class="base" style="background: red">1</li>
+    <li class="base" style="background: sienna">2</li>
+    <li class="base" style="background: rgb(40, 152, 218)">3</li>
+    <li class="base" style="background: rgb(148, 39, 124)">4</li>
+    <li class="base" style="background: rgb(32, 224, 112)">5</li>
+    <li class="base" style="background: rgb(240, 111, 201)">6</li>
+  </ul>
+  <button class="nextButton">下一页</button>
+  <script>
+    let parent = document.querySelector('.parent')
+    let childs = parent.children
+    // 初始化
+    var activeNode = childs[0]
+    activeNode.classList.add('active')
+    childs[childs.length - 1].classList.add('stageLeft')
+    childs[1].classList.add('stageRight')
+    // 点击事件
+    parent.addEventListener('click', function (event) {
+      if (event.target.nodeName.toLowerCase() === 'li' && activeNode !== event.target) {
+
+        let pre = event.target.previousElementSibling ? event.target.previousElementSibling : event.target.parentNode.lastElementChild
+        let next = event.target.nextElementSibling ? event.target.nextElementSibling : event.target.parentNode.firstElementChild
+        event.target.className = ''
+        pre.className = ''
+        next.className = ''
+        event.target.classList.add('active')
+        event.target.classList.add('base')
+        pre.classList.add('stageLeft')
+        pre.classList.add('base')
+        next.classList.add('stageRight')
+        next.classList.add('base')
+        
+        activeNode.classList.remove('active')
+        activeNode.previousElementSibling ? activeNode.previousElementSibling.classList.remove('stageLeft') : activeNode.parentNode.lastElementChild.classList.remove('stageLeft')
+        activeNode.nextElementSibling ? activeNode.nextElementSibling.classList.remove('stageRight') :  activeNode.parentNode.firstElementChild.classList.remove('stageRight')
+        activeNode = event.target
+
+      }
+    })
+    document.querySelector('.nextButton').addEventListener('click', function() {
+      activeNode.nextElementSibling ? activeNode.nextElementSibling.click() : activeNode.parentNode.firstElementChild.click()
+    })
+  </script>
+</body>
+</html>

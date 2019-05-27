@@ -1,0 +1,120 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    class Fromise {
+      constructor (fun) {
+        this.state = 'pending'
+        this.data = null
+        this.resolveQueue = []
+        this.rejectQueue = []
+        fun(this.resolve.bind(this), this.reject.bind(this))
+      }
+      resolve (value) {
+        if (this.state === 'pending') {
+          this.state = 'resolve'
+          this.data = value
+          this.resolveQueue.forEach(fun => fun(value))
+        }
+      }
+      reject (value) {
+        if (this.state === 'pending') {
+          this.state = 'reject'
+          this.data = value
+          this.rejectQueue.forEach(fun => fun(value))
+        }
+      }
+      then (resolveBack, rejectBack) {
+        resolveBack = typeof resolveBack === 'function' ? resolveBack : function(value){return value}
+        rejectBack = typeof rejectBack === 'function' ? rejectBack : function(value){return value}
+        let that = this
+        let fromise2
+        // 当resolve方法被调用，状态变为成功执行的代码
+        if (this.state === 'resolve') {
+          // 首先返回新的Fromise对象
+          return fromise2 = new Fromise(function (resolve, reject) {
+            try {
+              // 得到then中成功回调的返回值
+              let result = resolveBack(that.data)
+              // 如果改返回值为Fromise对象,则将新返回Fromise的状态判断交由这个Fromise
+              if (result instanceof Fromise) {
+                // 如果这个Fromise构造函数中调用了resolve,那么then中的成功回调就会执行,而这个成功的回调也是返回的新的Fromise对象用来将状态变为成功的函数
+                // 次语句为promise的核心之一
+                result.then(resolve, reject)
+              } else {
+                // 如果返回的是一个基本类型的值,则调用resolve将返回的promise变为成功,并且将返回值传入
+                resolve(result)
+              }
+            } catch (e) {
+              // 出现异常则调用reject方法
+              reject(e)
+              console.error(e)
+            }
+          })
+        }
+        if (this.state === 'reject') {
+          return fromise2 = new Fromise(function (resolve, reject) {
+            try {
+              let result = rejectBack(that.data)
+              if (result instanceof Fromise) {
+                result.then(resolve, reject)
+              }
+            } catch (e) {
+              reject(e)
+              console.error(e)
+            }
+          })
+        }
+        if (this.state === 'pending') {
+          return fromise2 = new Fromise(function (resolve, reject) {
+            that.resolveQueue.push(function (value) {
+              try {
+                let result = resolveBack(value)
+                if (result instanceof Fromise) {
+                  result.then(resolve, reject)
+                } else {
+                  resolve(that.data)
+                }
+              } catch (e) {
+                console.error(e)
+                reject(e)
+              }
+            })
+            that.rejectQueue.push(function (value) {
+              try{
+                let result = rejectBack(value)
+                if (result instanceof Fromise) {
+                  result.then(resolve, reject)
+                }
+              } catch (e) {
+                console.error(e)
+                reject(e)
+              }
+            })
+          })
+        }
+      }
+      catch (rejectBack) {
+        return this.then(null, rejectBack)
+      }
+    }
+
+    let fei = new Fromise(function (resolve, reject) {
+      setTimeout(() => {
+        resolve(111)
+      }, 1000)
+    })
+    fei
+      .then()
+      .then()
+      .catch()
+      .then(data => alert(8))
+        
+  </script>
+</body>
+</html>

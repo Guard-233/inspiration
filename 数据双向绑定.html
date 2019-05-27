@@ -1,0 +1,193 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <input type="text" f-model="name">
+  <input type="text" f-model="name">
+  <input type="text" f-model="age">
+  <p f-bind="name"></p>
+  <button class="add">加</button>
+</head>
+<body>
+  <script>
+    (function () {
+      function Fei (data = {}) {
+        this.data = data
+        this.init()
+      }
+      // 双向绑定，传入一个属性即可
+      Fei.prototype.twoWayBinding = function (attr, before = function () {}) {
+        // 根据特有的标签与属性，拿到相应的dom
+        // let binding = 2
+        // let dom = document.querySelectorAll(`[f-model=${attr}]`)
+        // if (!dom) {
+        //   dom = document.querySelectorAll(`[f-bind=${attr}]`)
+        //   binding = 1
+        // }
+        // this.changeDomValue(dom, this.data.data[attr])
+        let that = this
+        let {dom, binding} = this.FindBindDom(attr)
+        let changeDomDataFuns = []
+        if (dom.length === 0) return
+        for (let d of dom) {
+          changeDomDataFuns.push(function (data) {
+            that.changeDomValue(d, data)
+          })
+        }
+
+        // 因为访问器数据没法直接保存数据，需要一个下划线属性保存数据
+        this[`_${attr}`] = ''
+
+        function setter (fun) {
+          let that = this
+          return function (data) {
+            fun.apply(that, [data, that[`_${attr}`]] )
+            that[`_${attr}`] = data
+            // 通过不同的节点类型，进行不一样的数据改变的方式
+            // that.changeDomValue(dom, data)
+            changeDomDataFuns.forEach(item => item(data))
+            // dom.value = that[`_${attr}`]
+          }
+        }
+
+        // 双向绑定，用于数据流向视图
+        Object.defineProperty(this, attr, {
+          configurable: true,
+          enumerable: true,
+          get: () => {
+            return this[`_${attr}`]
+          },
+          set: setter.bind(this, before)()
+        })
+        
+        for (let d of dom) {
+          // 双向绑定,用于视图流向数据
+          // 目前只有input框支持双向绑定
+          if (d.nodeName.toLowerCase() === 'input') {
+            let cpLock = false
+            d.addEventListener('compositionstart', () => {
+              cpLock = true
+            })
+            d.addEventListener('compositionend', (data) => {
+              cpLock = false
+              if (!cpLock) {
+                this[attr] = data.target.value
+              }
+            })
+            d.addEventListener('input', (data) => {
+              if (!cpLock) {
+                console.log('tag', this[attr])
+                this[attr] = data.target.value
+              }
+            })
+          } else {
+            // throw console.error('目前只有input框支持双向绑定')
+          }
+        }
+        
+        
+      }
+      Fei.prototype.oneWayBinding = function (attr) {
+        let dom = document.querySelector(`[f-bind=${attr}]`)
+      } 
+      // 初始化方法，对应与声明周期，现在主要是初始化数据
+      Fei.prototype.init = function() {
+        // 遍历所有的属性，放置到this下面，到时候好调用
+        let keys = Object.getOwnPropertyNames(this.data.data)
+        Object.assign(this, this.data.data)
+        // 初始化数据将数据绑定到dom上，并将watch之外的数据进行一次双向绑定处理
+        keys.forEach((key, index) => {
+          // let dom = document.querySelector(`[f-model=${key}]`)
+          // dom.value = this[key]
+          if (!this.data.watch.hasOwnProperty(key)) {
+            this.twoWayBinding(key)
+          }
+        })
+        // 调用watch方法，将watch数据进行双向绑定，并将watch方法放到set上
+        this.watch()
+        // 将methods方法放到this上
+        Object.assign(this, this.data.methods)
+        // 调用created方法，执行created钩子函数
+        this.created()
+      }
+      // 执行created钩子函数
+      Fei.prototype.created = function () {
+        this.data.created.call(this)
+      }
+      // 执行一次双向绑定，并将watch对象中的方法，放到相应的set中
+      Fei.prototype.watch = function () {
+        let watchs = Object.keys(this.data.watch)
+        watchs.forEach((key, index) => {
+          if (this.hasOwnProperty(key)) {
+            this.twoWayBinding(key, this.data.watch[key])
+          } else {
+            throw Error(`${key}不为data上的属性`)
+          }
+        })
+      }
+      // 根据不同的元素类型，所绑定数据的方式也不相同
+      Fei.prototype.changeDomValue = function (dom, value) {
+        if (dom.nodeType === Node.ELEMENT_NODE) {
+          if (dom.nodeName.toLowerCase() === 'input') {
+            dom.value = value
+          } else {
+            dom.innerText = value
+          }
+        } else {
+           throw console.error('绑定数据的元素的nodetype应该为1');
+        }
+      }
+      // 
+      Fei.prototype.FindBindDom = function (attr) {
+        let binding = 2
+        let dom2 = document.querySelectorAll(`[f-model=${attr}]`)
+        let dom1 = document.querySelectorAll(`[f-bind=${attr}]`)
+        // binding = 1
+        let dom = Array.from(dom2).concat(Array.from(dom1))
+        dom.forEach(item => {
+          this.changeDomValue(item, this.data.data[attr])
+        })
+        return {
+          dom,
+          binding
+        }
+      }
+      window.Fei = Fei
+    })()
+    
+   
+    let fei = new Fei({
+      data: {
+        name: '你好',
+        age: 18,
+        name2: '我，，，'
+      },
+      methods: {
+        add () {
+          let that = this
+          document.querySelector('.add').addEventListener('click', function () {
+            that.name++
+            that.name2 = '我滴个娘累啊  '
+          })
+        }
+      },
+      created() {
+        this.add()
+      },
+      watch: {
+        name (newVal, oldVal) {
+          console.log('新数据:', newVal, '老数据:', oldVal)
+        },
+        age (newVal, oldVal) {
+          console.log('新的年龄', newVal)
+        }
+      }
+    })
+   
+  
+
+  </script>
+</body>
+</html>
