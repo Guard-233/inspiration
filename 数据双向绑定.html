@@ -71,15 +71,20 @@
               cpLock = true
             })
             d.addEventListener('compositionend', (data) => {
+              console.log('tag', event)
               cpLock = false
               if (!cpLock) {
                 this[attr] = data.target.value
               }
             })
-            d.addEventListener('input', (data) => {
+            d.addEventListener('compositionupdate', event => {
+              // console.log('tag', event)
+            })
+            d.addEventListener('input', (event) => {
               if (!cpLock) {
-                console.log('tag', this[attr])
-                this[attr] = data.target.value
+                // console.log('tag', this[attr])
+                console.log('tag', event.inputMethod)
+                this[attr] = event.target.value
               }
             })
           } else {
