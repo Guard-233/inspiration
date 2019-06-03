@@ -4,10 +4,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
+  <h1>这是我自己实现的数据双向绑定,还可以对数据进行watch监听,具体的东西请看代码,这里只做一个简单的演示</h1>
   <input type="text" f-model="name">
   <input type="text" f-model="name">
   <input type="text" f-model="age">
   <p f-bind="name"></p>
+  <div f-bind="name"></div>
   <button class="add">加</button>
 </head>
 <body>
