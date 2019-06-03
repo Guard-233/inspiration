@@ -14,18 +14,6 @@
         .myUl li {
             height: 20px;
         }
-
-        /* .myUl::before {
-            content: '';
-            display: block;
-            margin-top: 5000px
-        }
-
-        .myUl::after {
-            content: '';
-            display: block;
-            margin-bottom: 5000px
-        } */
     </style>
 </head>
 
@@ -35,29 +23,39 @@
     </ul>
     <p class="time"></p>
     <div>
-        <input class="serach" type="text" placeholder="请输入一个最小值" >
-        <button class="goSerach">搜索</button>
         <button class="allCheck">全选</button>
         <button class="reCheck">反选</button>
     </div>
     <script>
-        let myUl = document.querySelector('.myUl')
-        let docFrag = document.createDocumentFragment()
 
+        // 选择ul
+        let myUl = document.querySelector('.myUl')
+        // 为减轻渲染时的压力，使用文档片段存储li
+        let docFrag = document.createDocumentFragment()
+        // 最大渲染个数
         let liDataLength = 1000000
+        // 存储数据的数组
         let liDataArr = []
+        // 页面显示的li的个数
         let showDomLength = 30
+        // 记录当前渲染到的个数
         let myTop = 0
+        // 循环添加一百万数据
         for (let i = 0; i < liDataLength; i++) {
             liDataArr.push({
                 num: Math.round(Math.random() * liDataLength),
                 check: false
             })
         }
+        // 核心方法 firstShow为要从第几个开始渲染
         function showDomFun(firstShow) {
+            // 重绘时清空ul
             myUl.innerHTML = ''
+            // 渲染计时
             let time = new Date()
+            // 放置渲染溢出
             let length = showDomLength > liDataLength ? liDataLength : showDomLength
+            // 循环,填入文档片段
             for (let i = firstShow; i < firstShow + length; i++) {
                 if (!liDataArr[i]) {
                     continue
@@ -67,51 +65,62 @@
                 li.innerHTML = `<input data-id=${i} type="checkbox" ${liDataArr[i].check ? 'checked' : ''} > ${i}-------${liDataArr[i].num}`
                 docFrag.appendChild(li)
             }
+            // 渲染文档片段
             myUl.appendChild(docFrag)
+            // 计算顶部空白位置
             myUl.firstElementChild.style.marginTop = firstShow * 20 + 'px'
-            myUl.lastElementChild.style.marginBottom = (liDataLength - firstShow) * 20 + 'px'
+            // 计算底部空白位置
+            myUl.lastElementChild.style.marginBottom = (liDataLength - firstShow - 30) * 20 + 'px'
+            // 显示渲染时间
             var showTime = document.querySelector('.time')
             showTime.innerText = new Date().getTime() - time.getTime()
         }
+        // 防抖布尔值
         let reshow = true
         myUl.addEventListener('scroll', function (event){
             myTop = Math.round(this.scrollTop / 20)
+            // 防抖设置,并且当前的渲染数不得超过规定最多个数
             if (reshow && myTop < liDataLength) {
                 reshow = false
                 setTimeout(() => {
                     reshow = true
+                    // 根据实际性能来调整防抖时间
                 }, 10);
                 // console.log(event)
                 showDomFun(myTop)
             }
         })
+        // 事件委派input点击
         myUl.addEventListener('click', function (event){
             if (event.target.nodeName.toLocaleLowerCase() === 'input') {
                 let i = event.target.dataset['id']
                 liDataArr[i].check = !liDataArr[i].check 
             }
         })
-        var saveArr = liDataArr
+        // var saveArr = liDataArr
 
-        document.querySelector('.goSerach').addEventListener('click', function () {
-            var serach = document.querySelector('.serach').value
-            liDataArr = saveArr.filter(item => item > serach)
-            liDataLength = liDataArr.length
-            showDomFun(myTop)
+        // document.querySelector('.goSerach').addEventListener('click', function () {
+        //     var serach = document.querySelector('.serach').value
+        //     liDataArr = saveArr.filter(item => item > serach)
+        //     liDataLength = liDataArr.length
+        //     showDomFun(myTop)
 
-        })
+        // })
+        // 全选
         document.querySelector('.allCheck').addEventListener('click', function (){
             liDataArr.forEach(item => {
                 item.check = true
             })
             showDomFun(myTop)
         })
+        // 反选
         document.querySelector('.reCheck').addEventListener('click', function (){
             liDataArr.forEach(item => {
                 item.check = !item.check
             })
             showDomFun(myTop)
         })
+        // 屏蔽ctrl+f 指定自己的搜索 ,未完待续
         document.addEventListener('keydown', function (event) {
             if (event.ctrlKey && (event.key === 'F' || event.key === 'f')) {
                 event.preventDefault()
