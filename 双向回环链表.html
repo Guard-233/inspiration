@@ -7,7 +7,9 @@
 </head>
 <body>
   <script>
+    // 单个节点类型
     class Node {
+      // 传入节点数据
       constructor (data) {
         this.next = null
         this.prev = null
@@ -15,6 +17,7 @@
       }
     }
     class List {
+      // 初始化列表，初始化头部节点，最后一个节点，index个节点，设置每个节点的上一个节点和下一个节点
       constructor (hardData) {
         this.hard = new Node(hardData)
         this.index = this.hard
@@ -25,6 +28,7 @@
         this.last.prev = this.hard
         this.length = 1
       }
+      // 添加一个节点
       add (data) {
         let now = new Node(data)
         this.index.next = now
@@ -35,6 +39,7 @@
         this.last.next = this.hard
         this.length++
       }
+      // 删除一个节点
       remove (data) {
         let now = this.hard
         let retData = null
@@ -59,6 +64,7 @@
         }
         return retData
       }
+      // 通过元素查找一个节点
       find (data) {
         let now = this.hard
         let retData = null
@@ -77,6 +83,20 @@
         }
         return retData
       }
+      // 通过下标查找一个节点
+      findIndex (index) {
+        let now = this.hard
+        let retData = -1
+        for (let i = 0; i < this.length ; i++) {
+          if (i === index) {
+            retData = now
+            return retData
+          }
+          now = now.next
+        }
+        return retData
+      }
+      // 列表中是否包含一个元素
       container (data) {
         if (this.find(data)) {
           return true
@@ -84,17 +104,16 @@
           return false
         }
       }
+      // 显示这个节点
       show () {
         return this
       }
     }
-    let myList = new List('头部')
+    let myList = new List(0)
     let a = []
-    myList.add('1')
-    myList.add('2')
-    for (let i = 0; i < 10000000; i++) {
+    for (let i = 1; i < 10000000; i++) {
       // a.push(i)
-      myList.add(i)
+      myList.add(`第${i}个元素` )
     }
     console.log(a)
     console.log(myList.show())
