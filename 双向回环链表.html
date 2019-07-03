@@ -1,0 +1,103 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    class Node {
+      constructor (data) {
+        this.next = null
+        this.prev = null
+        this.data = data
+      }
+    }
+    class List {
+      constructor (hardData) {
+        this.hard = new Node(hardData)
+        this.index = this.hard
+        this.last = this.hard
+        this.hard.next = this.hard
+        this.last.next = this.hard
+        this.hard.prev = this.hard
+        this.last.prev = this.hard
+        this.length = 1
+      }
+      add (data) {
+        let now = new Node(data)
+        this.index.next = now
+        now.prev = this.index
+        this.index = now
+        this.last = this.index
+        this.hard.prev = this.last
+        this.last.next = this.hard
+        this.length++
+      }
+      remove (data) {
+        let now = this.hard
+        let retData = null
+        for (let i = 0; i < this.length ; i++) {
+          if (now.next.data === data) {
+            retData = now.next
+            now.next = now.next.next
+            this.length--
+            return retData
+          } else if (this.hard.data === data) {
+            retData = this.hard
+            this.length--
+            this.hard = this.hard.next
+            return retData
+          } else if (now.next.next === null && now.next === data) {
+            retData = now.next
+            now.next = null
+            this.length--
+            return retData
+          }
+          now = now.next
+        }
+        return retData
+      }
+      find (data) {
+        let now = this.hard
+        let retData = null
+        for (let i = 0; i < this.length ; i++) {
+          if (now.next.data === data) {
+            retData = now.next
+            return retData
+          } else if (this.hard.data === data) {
+            retData = this.hard
+            return retData
+          } else if (now.next.next === null && now.next === data) {
+            retData = now.next
+            return retData
+          }
+          now = now.next
+        }
+        return retData
+      }
+      container (data) {
+        if (this.find(data)) {
+          return true
+        } else {
+          return false
+        }
+      }
+      show () {
+        return this
+      }
+    }
+    let myList = new List('头部')
+    let a = []
+    myList.add('1')
+    myList.add('2')
+    for (let i = 0; i < 10000000; i++) {
+      // a.push(i)
+      myList.add(i)
+    }
+    console.log(a)
+    console.log(myList.show())
+  </script>
+</body>
+</html>
