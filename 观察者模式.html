@@ -1,0 +1,62 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>观察者模式</title>
+</head>
+
+<body>
+  <script>
+    class EyeEye {
+      constructor () {
+        this.callbacks = {}
+      }
+      watch(event, callback) {
+        if (!this.callbacks[event]) {
+          this.callbacks[event] = []
+        }
+        this.callbacks[event].push(callback)
+        
+      }
+      do(event, ...props) {
+        if (this.callbacks.hasOwnProperty(event)) {
+          this.callbacks[event].forEach(item => {
+            item.apply(props)
+          })
+        }
+      }
+      unWatch(event, callback) {
+        if (!callback) {
+          delete this.callbacks[event]
+        } else {
+          let index = this.callbacks[event].findIndex(item => item === callback)
+          this.callbacks[event].splice(index, 1)
+        }
+      }
+      show () {
+        return this.callbacks
+      }
+    }
+    let  a=  new EyeEye
+    a.watch('huabeidi', function () {
+      console.log('华贝迪')
+    })
+    setTimeout(() => {
+      a.do('huabeidi')
+    }, 1000);
+    a.unWatch('huabeidi')
+    function E () {
+      this.name = {}
+    
+    }
+    E.prototype.a  = function () {
+
+    }
+    var b = new E()
+    console.log(Object.getPrototypeOf(b), b, E.prototype)
+  </script>
+</body>
+
+</html>
