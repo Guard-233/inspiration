@@ -1,0 +1,39 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let arr = [1,2,3,4,5,6] 
+    function asyncFunction (arg, callback) {
+      console.log(`arg为${arg}, 1秒后返回结果`)
+      setTimeout(() => {
+        callback(arg + 1)
+      }, 1000)
+    }
+    // arr.forEach(item => {
+    //   asyncFunction(item, function () {
+
+    //   })
+    // })
+    function finallyFunction () {
+      console.log('最终')
+    }
+    function nowGo() {
+      if (arr.length > 0) {
+        asyncFunction(arr.pop(), function (i) {
+          nowGo()
+        })
+      } else {
+        finallyFunction()
+      }
+    }
+    nowGo()
+
+    
+  </script>
+</body>
+</html>
